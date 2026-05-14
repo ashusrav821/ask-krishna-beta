@@ -95,6 +95,26 @@
     .voice-item{width:100%;padding:10px 12px;background:rgba(249,115,22,0.05);border:1px solid rgba(249,115,22,0.15);border-radius:10px;color:#e5e7eb;font-size:12.5px;cursor:pointer;font-family:inherit;text-align:left;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
     .voice-item.selected{background:rgba(249,115,22,0.2);border-color:#f97316}
     @supports(padding-bottom:env(safe-area-inset-bottom)){#input-area{padding-bottom:calc(14px + env(safe-area-inset-bottom))}#header{padding-top:calc(14px + env(safe-area-inset-top))}}
+    /* Hamburger Menu */
+    #hamburger-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+    #hamburger-overlay.show{display:block}
+    #hamburger-sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:680px;background:#1a0800;border-top:1px solid rgba(249,115,22,0.35);border-radius:22px 22px 0 0;z-index:151;transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -8px 40px rgba(0,0,0,0.6)}
+    #hamburger-sheet.open{transform:translateX(-50%) translateY(0)}
+    #hamburger-handle{width:40px;height:4px;background:rgba(249,115,22,0.35);border-radius:2px;margin:14px auto 6px}
+    #hamburger-items{padding:6px 0 18px}
+    .hmenu-item{display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;transition:background 0.15s;-webkit-tap-highlight-color:transparent}
+    .hmenu-item:active{background:rgba(249,115,22,0.08)}
+    .hmenu-icon{font-size:20px;width:28px;text-align:center;flex-shrink:0}
+    .hmenu-label{flex:1;min-width:0}
+    .hmenu-title{font-size:15px;color:#f3f4f6;font-weight:600;letter-spacing:0.01em}
+    .hmenu-sub{font-size:12px;color:rgba(253,186,116,0.6);margin-top:2px}
+    .hmenu-arrow{font-size:20px;color:rgba(249,115,22,0.4);flex-shrink:0}
+    .hmenu-divider{height:1px;background:rgba(249,115,22,0.1);margin:6px 20px}
+    .hmenu-toggle{width:44px;height:26px;border-radius:13px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);flex-shrink:0;position:relative;transition:all 0.25s;cursor:pointer}
+    .hmenu-toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#aaa;transition:all 0.25s}
+    .hmenu-toggle.on{background:linear-gradient(135deg,#f97316,#ea580c);border-color:#f97316;box-shadow:0 0 8px rgba(249,115,22,0.4)}
+    .hmenu-toggle.on::after{transform:translateX(18px);background:white}
+    #menu-btn{font-size:18px}
   </style>
 </head>
 <body oncontextmenu="return false">
@@ -106,11 +126,7 @@
       <div id="header-sub">WISDOM OF THE BHAGAVAD GITA &middot; 18 CHAPTERS &middot; 700 VERSES</div>
     </div>
     <div id="header-actions">
-      <button class="hdr-btn" id="om-btn" title="Play Om sound">&#x1F54E;</button>
-      <button class="hdr-btn" id="tts-btn" title="Tap: toggle voice | Hold: pick voice">&#x1F50A;</button>
-      <button class="hdr-btn" id="tips-btn" title="Help and Tips">&#x2139;&#xFE0F;</button>
-      <button class="hdr-btn" id="lang-btn" title="Change Language">&#x1F310;</button>
-      <button class="hdr-btn" id="history-btn" title="Save History">&#x1F4BE;</button>
+      <button class="hdr-btn" id="menu-btn" title="Menu" onclick="openHamburger()">&#x2630;</button>
     </div>
   </div>
   <div id="beta-banner">&#x1F9EA; <strong>Beta</strong> &mdash; Testing: &#x1F54E; Real Om sound &amp; &#x1F50A; Voice responses (hold speaker to pick voice)</div>
@@ -174,6 +190,88 @@
       </div>
     </div>
   </div>
+  <!-- Hamburger Menu Bottom Sheet -->
+  <div id="hamburger-overlay" onclick="closeHamburger()"></div>
+  <div id="hamburger-sheet">
+    <div id="hamburger-handle"></div>
+    <div id="hamburger-items">
+      <!-- Om Sound -->
+      <div class="hmenu-item" id="hm-om" onclick="toggleOmFromMenu()">
+        <div class="hmenu-icon" id="hm-om-icon">&#x1F54E;</div>
+        <div class="hmenu-label">
+          <div class="hmenu-title">Om Sound</div>
+          <div class="hmenu-sub" id="hm-om-sub">Tap to play calming Om</div>
+        </div>
+        <div class="hmenu-toggle" id="hm-om-toggle"></div>
+      </div>
+      <!-- Voice TTS -->
+      <div class="hmenu-item" id="hm-tts" onclick="toggleTtsFromMenu()">
+        <div class="hmenu-icon">&#x1F50A;</div>
+        <div class="hmenu-label">
+          <div class="hmenu-title">Voice Responses</div>
+          <div class="hmenu-sub" id="hm-tts-sub">Krishna speaks every answer</div>
+        </div>
+        <div class="hmenu-toggle" id="hm-tts-toggle"></div>
+      </div>
+      <!-- Pick Voice -->
+      <div class="hmenu-item" onclick="openVoicePicker();closeHamburger()">
+        <div class="hmenu-icon">&#x1F399;&#xFE0F;</div>
+        <div class="hmenu-label">
+          <div class="hmenu-title">Pick Krishna Voice</div>
+          <div class="hmenu-sub">Choose warm male Indian voice</div>
+        </div>
+        <div class="hmenu-arrow">&#x203A;</div>
+      </div>
+      <div class="hmenu-divider"></div>
+      <!-- Language -->
+      <div class="hmenu-item" onclick="openLangFromMenu()">
+        <div class="hmenu-icon">&#x1F310;</div>
+        <div class="hmenu-label">
+          <div class="hmenu-title">Language</div>
+          <div class="hmenu-sub" id="hm-lang-sub">English</div>
+        </div>
+        <div class="hmenu-arrow">&#x203A;</div>
+      </div>
+      <!-- Save History -->
+      <div class="hmenu-item" onclick="openHistFromMenu()">
+        <div class="hmenu-icon">&#x1F4BE;</div>
+        <div class="hmenu-label">
+          <div class="hmenu-title">Save History</div>
+          <div class="hmenu-sub" id="hm-hist-sub">Off — tap to enable</div>
+        </div>
+        <div class="hmenu-toggle" id="hm-hist-toggle"></div>
+      </div>
+      <div class="hmenu-divider"></div>
+      <!-- Help & Tips -->
+      <div class="hmenu-item" onclick="openTips();closeHamburger()">
+        <div class="hmenu-icon">&#x2139;&#xFE0F;</div>
+        <div class="hmenu-label">
+          <div class="hmenu-title">Help &amp; Tips</div>
+          <div class="hmenu-sub">Quick guide to all features</div>
+        </div>
+        <div class="hmenu-arrow">&#x203A;</div>
+      </div>
+      <!-- Share App -->
+      <div class="hmenu-item" onclick="shareApp()">
+        <div class="hmenu-icon">&#x1F4E4;</div>
+        <div class="hmenu-label">
+          <div class="hmenu-title">Share App</div>
+          <div class="hmenu-sub">Spread Krishna's wisdom</div>
+        </div>
+        <div class="hmenu-arrow">&#x203A;</div>
+      </div>
+      <!-- Clear Chat -->
+      <div class="hmenu-item" onclick="clearChatFromMenu()">
+        <div class="hmenu-icon">&#x1F5D1;&#xFE0F;</div>
+        <div class="hmenu-label">
+          <div class="hmenu-title">Clear Chat</div>
+          <div class="hmenu-sub">Start a fresh conversation</div>
+        </div>
+        <div class="hmenu-arrow" style="color:rgba(239,68,68,0.6)">&#x203A;</div>
+      </div>
+    </div>
+  </div>
+
   <div id="messages"><div id="suggestions"></div></div>
   <div id="input-area">
     <div id="input-row">
@@ -224,11 +322,11 @@ var sendBtn=document.getElementById('send-btn');
 var micBtn=document.getElementById('mic-btn');
 var offBanner=document.getElementById('offline-banner');
 var instBanner=document.getElementById('install-banner');
-var histBtn=document.getElementById('history-btn');
-var langBtn=document.getElementById('lang-btn');
+var histBtn=document.getElementById('history-btn')||{classList:{add:function(){},remove:function(){}}};
+var langBtn=document.getElementById('lang-btn')||{classList:{add:function(){},remove:function(){}}};
 var tipsBtn=document.getElementById('tips-btn');
-var ttsBtn=document.getElementById('tts-btn');
-var omBtn=document.getElementById('om-btn');
+var ttsBtn=document.getElementById('tts-btn')||{classList:{add:function(){},remove:function(){}}};
+var omBtn=document.getElementById('om-btn')||{classList:{add:function(){},remove:function(){}}}
 var histStatus=document.getElementById('history-status');
 var langInd=document.getElementById('lang-indicator');
 function closeModal(id){document.getElementById(id).classList.remove('show')}
@@ -246,13 +344,13 @@ document.getElementById('install-close').addEventListener('click',function(){ins
 if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.matchMedia('(display-mode: standalone)').matches){instBanner.style.display='flex';instBanner.querySelector('span').textContent='Tap Share then Add to Home Screen to install!';document.getElementById('install-btn').style.display='none';}
 function selectLang(lang){pendLang=lang;['en','te','ta','hi'].forEach(function(l){var el=document.getElementById('lang-'+l);if(el)el.classList.toggle('selected',l===lang)})}
 function confirmLang(){curLang=pendLang;localStorage.setItem(LK,curLang);var c=LC[curLang];langInd.innerHTML=c.ind;inputEl.placeholder=c.ph;if(curLang==='en'){langBtn.classList.remove('active')}else{langBtn.classList.add('active')}closeModal('lang-modal');addMsg('assistant',c.sw)}
-langBtn.addEventListener('click',function(){pendLang=curLang;['en','te','ta','hi'].forEach(function(l){var el=document.getElementById('lang-'+l);if(el)el.classList.toggle('selected',l===curLang)});openModal('lang-modal')});
+if(langBtn&&langBtn.addEventListener)langBtn.addEventListener('click',function(){pendLang=curLang;['en','te','ta','hi'].forEach(function(l){var el=document.getElementById('lang-'+l);if(el)el.classList.toggle('selected',l===curLang)});openModal('lang-modal')});
 function updateHistBtn(){if(histEn){histBtn.classList.add('active');histStatus.style.display='block'}else{histBtn.classList.remove('active');histStatus.style.display='none'}}
 function saveHist(){if(!histEn)return;try{localStorage.setItem(HK,JSON.stringify(msgs))}catch(e){}}
 function loadHist(){try{var s=localStorage.getItem(HK);return s?JSON.parse(s):null}catch(e){return null}}
 function enableHistory(){histEn=true;localStorage.setItem(HEK,'true');saveHist();updateHistBtn();closeModal('history-modal');addMsg('assistant','Your conversations will now be saved on this device only — never in any cloud.')}
 function clearHistory(){histEn=false;localStorage.removeItem(HEK);localStorage.removeItem(HK);updateHistBtn();closeModal('history-modal');addMsg('assistant','History cleared. Each session starts fresh, like a new dawn.')}
-histBtn.addEventListener('click',function(){var desc=document.getElementById('history-desc');var enR=document.getElementById('modal-enable-row');var disR=document.getElementById('modal-disable-row');if(histEn){desc.textContent='History saving is ON. Chats saved on this device only.';enR.style.display='none';disR.style.display='flex';disR.style.flexDirection='column'}else{desc.textContent='Enable to save your conversations on this device only.';enR.style.display='flex';disR.style.display='none'}openModal('history-modal')});
+if(histBtn&&histBtn.addEventListener)histBtn.addEventListener('click',function(){var desc=document.getElementById('history-desc');var enR=document.getElementById('modal-enable-row');var disR=document.getElementById('modal-disable-row');if(histEn){desc.textContent='History saving is ON. Chats saved on this device only.';enR.style.display='none';disR.style.display='flex';disR.style.flexDirection='column'}else{desc.textContent='Enable to save your conversations on this device only.';enR.style.display='flex';disR.style.display='none'}openModal('history-modal')});
 updateHistBtn();
 function addMsg(role,content){msgs.push({role:role,content:content});var row=document.createElement('div');row.className='msg-row '+role;var av=document.createElement('div');av.className='avatar '+(role==='assistant'?'bot':'user');av.textContent=role==='assistant'?'\uD83E\uDD9A':'\uD83D\uDE4F';var bub=document.createElement('div');bub.className='bubble '+(role==='assistant'?'bot':'user');bub.textContent=content;row.appendChild(av);row.appendChild(bub);messagesEl.appendChild(row);scrollBottom();saveHist();if(role==='assistant'){setTimeout(function(){speakText(content)},400);}}
 function showTyping(){var row=document.createElement('div');row.className='msg-row';row.id='typing-row';var av=document.createElement('div');av.className='avatar bot';av.textContent='\uD83E\uDD9A';var bub=document.createElement('div');bub.className='bubble bot';bub.innerHTML='<div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';row.appendChild(av);row.appendChild(bub);messagesEl.appendChild(row);scrollBottom()}
@@ -261,11 +359,90 @@ function sendMessage(){var text=inputEl.value.trim();if(!text||loading)return;if
 inputEl.addEventListener('input',function(){inputEl.style.height='auto';inputEl.style.height=Math.min(inputEl.scrollHeight,100)+'px';updateSend()});
 inputEl.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
 sendBtn.addEventListener('click',sendMessage);
+// Hamburger Menu
+var menuBtn=document.getElementById('menu-btn');
+var hamburgerSheet=document.getElementById('hamburger-sheet');
+var hamburgerOverlay=document.getElementById('hamburger-overlay');
+function openHamburger(){
+  updateHamburgerState();
+  hamburgerSheet.classList.add('open');
+  hamburgerOverlay.classList.add('show');
+}
+function closeHamburger(){
+  hamburgerSheet.classList.remove('open');
+  hamburgerOverlay.classList.remove('show');
+}
+function updateHamburgerState(){
+  // Om toggle
+  var omT=document.getElementById('hm-om-toggle');
+  var omS=document.getElementById('hm-om-sub');
+  if(omPlaying){omT.classList.add('on');omS.textContent='Playing — tap to stop';}
+  else{omT.classList.remove('on');omS.textContent='Tap to play calming Om';}
+  // TTS toggle
+  var ttsT=document.getElementById('hm-tts-toggle');
+  var ttsS=document.getElementById('hm-tts-sub');
+  if(ttsEnabled){ttsT.classList.add('on');ttsS.textContent='On — Krishna speaks answers';}
+  else{ttsT.classList.remove('on');ttsS.textContent='Off — tap to enable';}
+  // History toggle
+  var histT=document.getElementById('hm-hist-toggle');
+  var histS=document.getElementById('hm-hist-sub');
+  if(histEn){histT.classList.add('on');histS.textContent='On — saved on device only';}
+  else{histT.classList.remove('on');histS.textContent='Off — tap to enable';}
+  // Language
+  var langNames={en:'English',te:'Telugu',ta:'Tamil',hi:'Hindi'};
+  document.getElementById('hm-lang-sub').textContent=langNames[curLang]||'English';
+}
+function toggleOmFromMenu(){
+  if(omPlaying){stopOm();}else{playOm();}
+  updateHamburgerState();
+}
+function toggleTtsFromMenu(){
+  ttsEnabled=!ttsEnabled;
+  localStorage.setItem(TTSK,ttsEnabled?'true':'false');
+  updateTtsBtn();
+  if(ttsEnabled)speakText('Voice responses are now enabled.');
+  updateHamburgerState();
+}
+function openLangFromMenu(){
+  closeHamburger();
+  pendLang=curLang;
+  ['en','te','ta','hi'].forEach(function(l){var el=document.getElementById('lang-'+l);if(el)el.classList.toggle('selected',l===curLang)});
+  openModal('lang-modal');
+}
+function openHistFromMenu(){
+  closeHamburger();
+  var desc=document.getElementById('history-desc');
+  var enR=document.getElementById('modal-enable-row');
+  var disR=document.getElementById('modal-disable-row');
+  if(histEn){desc.textContent='History saving is ON. Chats saved on this device only.';enR.style.display='none';disR.style.display='flex';disR.style.flexDirection='column';}
+  else{desc.textContent='Enable to save your conversations on this device only.';enR.style.display='flex';disR.style.display='none';}
+  openModal('history-modal');
+}
+function clearChatFromMenu(){
+  closeHamburger();
+  if(confirm('Clear this conversation and start fresh?')){
+    msgs=[];
+    messagesEl.innerHTML='<div id="suggestions"></div>';
+    suggestEl=document.getElementById('suggestions');
+    SUGG.forEach(function(s){var btn=document.createElement('button');btn.className='suggestion-btn';btn.textContent=s;btn.onclick=function(){inputEl.value=s;updateSend();suggestEl.style.display='none';inputEl.focus()};suggestEl.appendChild(btn)});
+    if(histEn)localStorage.removeItem(HK);
+    addMsg('assistant',LC[curLang].welcome);
+  }
+}
+function shareApp(){
+  closeHamburger();
+  if(navigator.share){navigator.share({title:'Ask Krishna',text:'Discover the timeless wisdom of the Bhagavad Gita with Ask Krishna!',url:'https://ashusrav821.github.io/ask-krishna-beta/'}).catch(function(){});}
+  else{navigator.clipboard&&navigator.clipboard.writeText('https://ashusrav821.github.io/ask-krishna-beta/').then(function(){addMsg('assistant','Link copied to clipboard! Share Ask Krishna with others.')}).catch(function(){addMsg('assistant','Visit https://ashusrav821.github.io/ask-krishna-beta/ to share!')});}
+}
+// Swipe down to close hamburger
+var sheetStartY=0;
+hamburgerSheet.addEventListener('touchstart',function(e){sheetStartY=e.touches[0].clientY},{passive:true});
+hamburgerSheet.addEventListener('touchend',function(e){if(e.changedTouches[0].clientY-sheetStartY>60)closeHamburger()},{passive:true});
 // Om Sound - Real MP3
 function initOm(){if(!omAudio){omAudio=new Audio('om.mp3');omAudio.loop=true;omAudio.volume=0.75;omAudio.addEventListener('error',function(){addMsg('assistant','Could not load Om sound. Please make sure om.mp3 is uploaded to your GitHub repo.');});}}
 function stopOm(){if(omAudio){omAudio.pause();omAudio.currentTime=0;}omPlaying=false;omBtn.classList.remove('playing');omBtn.title='Play Om sound'}
 function playOm(){initOm();omAudio.play().then(function(){omPlaying=true;omBtn.classList.add('playing');omBtn.title='Stop Om sound'}).catch(function(){addMsg('assistant','Please tap the Om button again. Browser requires a user tap first.')})}
-omBtn.addEventListener('click',function(){if(omPlaying){stopOm()}else{playOm()}});
+if(omBtn&&omBtn.addEventListener)omBtn.addEventListener('click',function(){if(omPlaying){stopOm()}else{playOm()}});
 // TTS - Warm Male Indian Voice
 var ttsLangMap={en:'en-IN',te:'te-IN',ta:'ta-IN',hi:'hi-IN'};
 var MALE_PREF=['Ravi','Hemant','Mohan','Arjun','Karan','Google Hindi','Microsoft Heera','en-IN','Neural2-B','Neural2-C','Wavenet-B','Wavenet-C'];
@@ -274,11 +451,11 @@ function speakText(text){if(!ttsEnabled||!window.speechSynthesis)return;window.s
 function updateTtsBtn(){if(ttsEnabled){ttsBtn.classList.add('active');ttsBtn.title='Voice ON — tap to turn off | hold to pick voice';}else{ttsBtn.classList.remove('active');ttsBtn.title='Tap: toggle voice | Hold: pick voice';if(window.speechSynthesis)window.speechSynthesis.cancel();}}
 function openVoicePicker(){var voices=window.speechSynthesis?window.speechSynthesis.getVoices():[];var list=document.getElementById('voice-list');list.innerHTML='';var useful=voices.filter(function(v){return v.lang.startsWith('en')||v.lang.startsWith('hi')||v.lang.startsWith('te')||v.lang.startsWith('ta')});if(useful.length===0){list.innerHTML='<p style="color:#d1d5db;font-size:13px;text-align:center;padding:10px">No voices found. Try on your phone browser.</p>';openModal('voice-modal');return;}var saved=localStorage.getItem(VK);useful.forEach(function(v){var btn=document.createElement('button');btn.className='voice-item'+(saved===v.name?' selected':'');btn.innerHTML='<span>'+v.name+'</span><span style="font-size:11px;color:rgba(249,115,22,0.5)">'+v.lang+'</span>';btn.onclick=function(){window.speechSynthesis.cancel();var utt=new SpeechSynthesisUtterance('Namaste. I am Ask Krishna. May wisdom and peace guide you always.');utt.voice=v;utt.lang=v.lang;utt.rate=0.82;utt.pitch=0.85;utt.volume=0.92;window.speechSynthesis.speak(utt);localStorage.setItem(VK,v.name);list.querySelectorAll('.voice-item').forEach(function(b){b.classList.remove('selected')});btn.classList.add('selected')};list.appendChild(btn)});openModal('voice-modal')}
 var ttsPressTimer=null;
-ttsBtn.addEventListener('click',function(){ttsEnabled=!ttsEnabled;localStorage.setItem(TTSK,ttsEnabled?'true':'false');updateTtsBtn();if(ttsEnabled)speakText('Voice responses are now enabled. Ask Krishna will speak every response.')});
+if(ttsBtn&&ttsBtn.addEventListener){ttsBtn.addEventListener('click',function(){ttsEnabled=!ttsEnabled;localStorage.setItem(TTSK,ttsEnabled?'true':'false');updateTtsBtn();if(ttsEnabled)speakText('Voice responses are now enabled. Ask Krishna will speak every response.')});
 ttsBtn.addEventListener('mousedown',function(){ttsPressTimer=setTimeout(function(){openVoicePicker()},600)});
 ttsBtn.addEventListener('touchstart',function(){ttsPressTimer=setTimeout(function(){openVoicePicker()},600)},{passive:true});
 ttsBtn.addEventListener('mouseup',function(){clearTimeout(ttsPressTimer)});
-ttsBtn.addEventListener('touchend',function(){clearTimeout(ttsPressTimer)});
+ttsBtn.addEventListener('touchend',function(){clearTimeout(ttsPressTimer)});}
 if(window.speechSynthesis){window.speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices()}}
 updateTtsBtn();
 // Voice Input
@@ -289,7 +466,7 @@ var tipIdx=0;
 function renderTip(){var t=TIPS[tipIdx];var c=document.getElementById('tips-content');if(!c)return;c.innerHTML='<div class="tip-card"><div class="tip-icon">'+t.icon+'</div><div class="tip-title">'+t.title+'</div><div class="tip-desc">'+t.desc+'</div><div class="tip-steps">'+t.steps.replace(/\n/g,'<br>')+'</div></div>';var prog=document.getElementById('tips-progress');if(prog){prog.innerHTML='';TIPS.forEach(function(_,i){var d=document.createElement('button');d.className='tip-dot'+(i===tipIdx?' active':'');d.onclick=function(){tipIdx=i;renderTip()};prog.appendChild(d)})}var p=document.getElementById('tips-prev');var n=document.getElementById('tips-next');if(p)p.style.display=tipIdx===0?'none':'flex';if(n)n.textContent=tipIdx===TIPS.length-1?'Get Started':'Next'}
 function closeTips(){var o=document.getElementById('tips-overlay');if(o)o.classList.remove('show');localStorage.setItem(TK,'true')}
 function openTips(){tipIdx=0;renderTip();var o=document.getElementById('tips-overlay');if(o)o.classList.add('show')}
-tipsBtn.addEventListener('click',function(){openTips()});
+if(tipsBtn)tipsBtn.addEventListener('click',function(){openTips()});
 document.getElementById('tips-next').addEventListener('click',function(){if(tipIdx===TIPS.length-1){closeTips()}else{tipIdx++;renderTip()}});
 document.getElementById('tips-prev').addEventListener('click',function(){if(tipIdx>0){tipIdx--;renderTip()}});
 document.getElementById('tips-skip-btn').addEventListener('click',function(){closeTips()});
